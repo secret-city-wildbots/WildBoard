@@ -1,0 +1,1 @@
+The goal of this project is to create a dashboard that, instead of using NT4 to communicate, uses a simple http websocket connection via a webserver hosted off of the robot. This would prevent people from having to download any software on their computer and would keep the version of the dashboard centralized to the robot as well as allowing it to be programmed parshly in java.
