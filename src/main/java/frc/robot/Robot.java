@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.WildBoard.WildBoard;
+import frc.robot.WildBoard.Panels.*;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -20,6 +21,8 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     dashboard = new WildBoard(5804);
+    dashboard.addPanel(new LooptimeMonitor());
+    dashboard.start();
   }
 
   @Override

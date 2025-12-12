@@ -17,6 +17,7 @@ public class FrontendBuilder {
         // Copy esbuild only if missing or file size differs
         try {
             boolean copy = true;
+            // check file size diff to ensure new versions arent ignored
             if (esbuildTmp.exists() && esbuildTmp.length() == esbuildSrc.length()) {
                 copy = false;
             }
@@ -34,10 +35,12 @@ public class FrontendBuilder {
         File outputDir = new File("/tmp/frontend-public");
         outputDir.mkdirs();
 
+        File indexLoader = new File(frontendDir, "src/pages/indexLoader.tsx");
+
         // Build command using the /tmp copy
         ProcessBuilder pb = new ProcessBuilder(
             esbuildTmp.getAbsolutePath(),
-            "./src/pages/indexLoader.tsx",
+            indexLoader.getAbsolutePath(),
             "--bundle",
             "--outfile=" + new File(outputDir, "index.js").getAbsolutePath(),
             "--format=esm",

@@ -1,11 +1,10 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import Readout from "./Readout.tsx";
-import { Socket } from "socket.io-client";
+import { useSocketStore } from "../socket/SocketProvider.tsx";
 
 interface NTReadoutProps {
   nt: string;
-  socket: Socket;
   defaultVal?: any;
   chars?: number;
   precision?: number;
@@ -18,7 +17,6 @@ interface NTReadoutProps {
 
 const NTReadout = ({
   nt,
-  socket,
   defaultVal = "null",
   chars,
   precision,
@@ -28,7 +26,8 @@ const NTReadout = ({
   angle = false,
   temperature = false,
 }: NTReadoutProps) => {
-  const [value, setValue] = useState(defaultVal);
+  const socket = useSocketStore();
+  const [value, setValue] = useState(socket?.pullVal(nt));
 
   useEffect(() => {
     const handler = (newVal: any) => {
@@ -47,13 +46,16 @@ const NTReadout = ({
       }
     };
 
-    socket.on(nt, handler);
+    // initialize with initial value
+    handler(value);
+
+    if (socket) socket.on(nt, handler);
 
     // Cleanup listener on unmount or if nt/socket changes
     return () => {
-      socket.off(nt, handler);
+      if (socket) socket.off(nt, handler);
     };
-  }, [nt, socket, index, precision]); // re-register only if these change
+  }, [nt, index, precision]); // re-register only if these change
 
   return (
     <Readout text={value !== undefined && value !== null ? value:null} angle={angle} temperature={temperature} small={small} color={color} chars={chars} />
