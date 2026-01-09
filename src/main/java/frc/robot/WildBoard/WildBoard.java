@@ -2,16 +2,16 @@ package frc.robot.WildBoard;
 
 import frc.robot.WildBoard.Panels.*;
 
+import java.io.File;
 import java.util.ArrayList;
 
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Filesystem;
 
 public class WildBoard {
-    public Server server;
+    private Server server;
     private int PORT = 5804;
-    private double lastTime_s;
-    public double loopTime_ms;
-    public ArrayList<WBPanel> panels = new ArrayList<WBPanel>();
+    private ArrayList<WBPanel> panels = new ArrayList<WBPanel>();
+    private ArrayList<Tab> tabs = new ArrayList<Tab>();
 
     public WildBoard() {
     }
@@ -24,31 +24,46 @@ public class WildBoard {
         panels.add(panel);
     }
 
-    public void start() {
-        LooptimeMonitor looptimeMonitor = new LooptimeMonitor();
-        System.out.println(looptimeMonitor.generate());
-
-        FrontendBuilder.buildFrontend();
-        server = new Server(PORT);
-
-        lastTime_s = Timer.getTimestamp();
-
-        server.ws.on("test", (socket, data) -> {
-            System.out.println("recieved test message: "+data);
-            server.ws.emit(socket, "test", "Hello from server!");
-        });
+    public void addTab(Tab tab) {
+        tabs.add(tab);
     }
 
-    public void periodic() {
-        double curTime_s = Timer.getTimestamp();
-        loopTime_ms = Math.floor((curTime_s - lastTime_s)*1000);
-        lastTime_s = curTime_s;
+    public void start() {
+        clientBuild();
+        serverStart();
+    }
 
+    private void clientBuild() {
+        File deployDir = Filesystem.getDeployDirectory();
+        File frontendDir = new File(deployDir, "WildBoard/frontend");
+
+
+        FrontendBuilder.buildFrontend();
+    }
+
+    private void serverStart() {
+        server = new Server(PORT);
+
+        //startup panels
+        for (int i = 0; i < panels.size(); i++) {
+            WBPanel wbPanel = panels.get(i);
+
+            if (wbPanel.usesML) {
+                System.out.println("assigned ml id " + i);
+                wbPanel.assignML(new MessageLayer(server, i), i);
+            }
+            wbPanel.start();
+        }
+    }
+
+    /*
+     * Call this method within RobotPeriodic in order for the dashboard
+     * to function properly
+     */
+    public void update() {
         //update all panels
         for (WBPanel wbPanel : panels) {
             wbPanel.update();
         }
-
-        //server.ws.broadcast("looptime", loopTime_ms);
     }
 }

@@ -24,6 +24,9 @@ public class Server {
     private final Path publicDir;
     public WsServer ws;
 
+    /*
+     * A simple http + ws implementation made by ChatGPT
+     */
     public Server(int port) {
         try {
             publicDir = Filesystem.getDeployDirectory().toPath().resolve("WildBoard/frontend/public");

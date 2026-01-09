@@ -10,8 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "preact": "^10.27.2",
-    "socket.io-client": "^4.8.1"
+    "preact": "^10.27.2"
   },
   "devDependencies": {
     "esbuild": "0.25.10"

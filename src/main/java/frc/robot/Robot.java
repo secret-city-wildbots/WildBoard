@@ -26,7 +26,9 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    dashboard.update();
+  }
 
   @Override
   public void autonomousInit() {}
