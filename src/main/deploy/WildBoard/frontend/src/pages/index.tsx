@@ -2,20 +2,7 @@ import { h } from "preact";
 import { io } from "socket.io-client";
 import TabbedContainer from "../components/TabbedContainer.tsx";
 import Container from "../components/Container.tsx";
-import DashboardItem from "../components/DashboardItem.tsx";
-import NTReadout from "../components/NTReadout.tsx";
-import SimpleSubsystem from "../panels/SimpleSubsystem.tsx";
-import SwerveModules from "../panels/SwerveModules.tsx";
-import MasterStates from "../panels/MasterStates.tsx";
-import DashboardSubRow from "../components/DashboardSubRow.tsx";
-import FieldMap from "../panels/FieldMap.tsx";
-import ActuatorTesting from "../panels/ActuatorTesting.tsx";
-import DriverProfiles from "../panels/DriverProfiles.tsx";
 import FlexRow from "../components/FlexRow.tsx";
-import RobotPosEditor from "../panels/RobotPosEditor.tsx";
-import RobotPosReadout from "../panels/RobotPosReadout.tsx";
-import CameraFeed from "../panels/CameraFeed.tsx";
-import Placeholder from "../panels/Placeholder.tsx";
 import Checklist from "../panels/Checklist.tsx";
 
 export default function () {
@@ -27,7 +14,7 @@ export default function () {
             content: (<Container>
                 <Checklist socket={socket} />
             </Container>),
-        },
+        }/*,
         {
             title: "Setup/Auto",
             content: (
@@ -144,7 +131,7 @@ export default function () {
         {
             title: "Variables",
             content: <Container>very helpful thingy that is on the TODO list</Container>,
-        },
+        },*/
     ];
 
     return (
@@ -159,15 +146,8 @@ export default function () {
                             <label class="label-small" style="margin-right: 0; padding-right: 0;">
                                 Loop (ms):{" "}
                             </label>
-                            <NTReadout nt="Control_Loop_Time" precision={0} socket={socket} />
+                            <NTReadout nt="looptime" precision={0} />
                         </FlexRow>
-                    </div>
-                    <hr/>
-                    <div class="column-item" style="padding-bottom: 0;">
-                        <MasterStates
-                            socket={socket}
-                            masterStates={["STOW", "FEED", "SCOR", "CLMB"]}
-                        />
                     </div>
                 </div>
             </div>
