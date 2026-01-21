@@ -21,10 +21,17 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     dashboard = new WildBoard(5804);
+    dashboard.addTab((new Tab()).addChild(new Checklist()).setTitle("Checklist"));
+    Tab test = new Tab()
+      .addChild(new Col(3)
+        .addChild(new LooptimeMonitor())
+      )
+      .setTitle("TESt");
+    dashboard.addTab(test);
     dashboard.addPanel(new LooptimeMonitor());
     dashboard.start();
   }
-
+ 
   @Override
   public void robotPeriodic() {
     dashboard.update();

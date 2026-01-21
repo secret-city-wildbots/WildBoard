@@ -2,7 +2,7 @@ import { h } from "preact";
 import TabbedContainer from "../components/TabbedContainer.tsx";
 import Container from "../components/Container.tsx";
 import FlexRow from "../components/FlexRow.tsx";
-import Checklist from "../legacypanels/Checklist.tsx";
+import Checklist from "../panels/Checklist.tsx";
 import LooptimeMonitor from "../panels/LooptimeMonitor.tsx";
 import { WsEventBus } from "../ws/WSEventBus.ts";
 

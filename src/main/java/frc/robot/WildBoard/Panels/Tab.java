@@ -16,25 +16,26 @@ public class Tab extends WBPanel {
     /**
      * Add a child
      */
-    public void addChild(String genChild) {
-        this.children = this.children + genChild;
+    public Tab addChild(WBPanel child) {
+        this.children.add(child);
+        return this;
+    }
+
+    @Override
+    public String genImport() {
+        String childImports = "";
+        for (WBPanel child: this.children) {
+            childImports+=child.genImport();
+        }
+        return childImports;
     }
 
     @Override
     public String generate() {
-        return """
-                {
-                    title: "
-                    """
-                            + this.title +
-                            """
-                    ",
-                    content: (<Container>
-                                """
-                                + this.children +
-                                """
-                    </Container>),
-                },
-                """;
+        String childString = "";
+        for (WBPanel child: this.children) {
+            childString+=child.generate();
+        }
+        return "{title: \""+this.title+"\",content: (<Container><div class=\"row bubble\">"+childString+"</div></Container>)},";
     }
 }

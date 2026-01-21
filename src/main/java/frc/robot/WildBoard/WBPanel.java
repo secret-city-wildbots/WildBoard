@@ -1,12 +1,13 @@
 package frc.robot.WildBoard;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 public class WBPanel {
     private String panelName = "Placeholder";
-    public String children = "";
+    public ArrayList<WBPanel> children = new ArrayList<>();
     private Dictionary<String, String> props = new Hashtable<>();
     private Dictionary<String, Integer> intprops = new Hashtable<>();
     public boolean usesML = false;
@@ -27,11 +28,27 @@ public class WBPanel {
         this.intprops.put(key, val);
     }
 
+    public void appendToProp(String key, String val) {
+        if (this.props.get(key) == null) {
+            this.props.put(key, val);
+        } else {
+            this.props.put(key, this.props.get(key) + val);
+        }
+    }
+
+    public String getProp(String key) {
+        return this.props.get(key);
+    }
+
     /*
      * set the tsx panel name
      */
     public void setPanelName(String name) {
         this.panelName = name;
+    }
+
+    public String getPanelName() {
+        return this.panelName;
     }
 
     /*
@@ -78,14 +95,19 @@ public class WBPanel {
             String key = e.nextElement();
             propsString = propsString + key + "={" + intprops.get(key) + "} ";
         }
+
+        String childrenString = "";
+        for (WBPanel panel: this.children) {
+            childrenString = childrenString + panel.generate();
+        }
         
-        return String.format("<%s %s>%s</%s>", panelName, propsString, children, panelName);
+        return String.format("<%s %s>%s</%s>", panelName, propsString, childrenString, panelName);
     }
 
     /*
      * Method that outputs the import statement
      */
     public String genImport() {
-        return "import LooptimeMonitor from \"../panels/"+ panelName +".tsx\";";
+        return "import " + panelName + " from \"/home/lvuser/deploy/WildBoard/frontend/src/panels/"+ panelName +".tsx\";";
     }
 }

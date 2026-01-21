@@ -23,6 +23,7 @@ public class Server {
 
     private final Path publicDir;
     public WsServer ws;
+    private HttpServer httpServer;
 
     /*
      * A simple http + ws implementation made by ChatGPT
@@ -32,17 +33,15 @@ public class Server {
             publicDir = Filesystem.getDeployDirectory().toPath().resolve("WildBoard/frontend/public");
 
             // --- HTTP Server ---
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+            httpServer = HttpServer.create(new InetSocketAddress(port), 0);
             httpServer.createContext("/", new StaticFileHandler(publicDir));
             httpServer.setExecutor(null);
-            httpServer.start();
 
             // --- WebSocket Server ---
             ws = new WsServer(port+1);
             ws.on("ping", (socket, data) -> {
                 ws.emit(socket, "pong", "");
             });
-            ws.start();
 
             System.out.println("HTTP + WebSocket server running on port " + (port+1));
             System.out.println("Serving files from: " + publicDir.toAbsolutePath());
@@ -50,6 +49,11 @@ public class Server {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void start() {
+        httpServer.start();
+        ws.start();
     }
 
     // --------------------------

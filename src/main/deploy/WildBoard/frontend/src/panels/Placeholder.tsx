@@ -2,7 +2,12 @@ import { h } from "preact";
 
 import DashboardItem from "../components/DashboardItem.tsx";
 
-export default function(text: String, height:number = 5) {
+interface Props {
+  text: String;
+  height?: number;
+}
+
+export default function({text, height = 5}: Props) {
 
     return (
         <DashboardItem>
