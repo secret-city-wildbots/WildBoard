@@ -1,20 +1,21 @@
 import { h } from "preact";
-import { io } from "socket.io-client";
 import TabbedContainer from "../components/TabbedContainer.tsx";
 import Container from "../components/Container.tsx";
 import FlexRow from "../components/FlexRow.tsx";
 import Checklist from "../panels/Checklist.tsx";
+import LooptimeMonitor from "../panels/LooptimeMonitor.tsx";
+import { WsEventBus } from "../ws/WSEventBus.ts";
 
 export default function () {
-    const socket = io();
+    const socket = new WsEventBus(`ws://${window.location.hostname}:5805`);
 
     const tabs = [
         {
             title: "Checklist",
             content: (<Container>
-                <Checklist socket={socket} />
+                <Checklist />
             </Container>),
-        }/*,
+        },/*
         {
             title: "Setup/Auto",
             content: (
@@ -146,7 +147,7 @@ export default function () {
                             <label class="label-small" style="margin-right: 0; padding-right: 0;">
                                 Loop (ms):{" "}
                             </label>
-                            <NTReadout nt="looptime" precision={0} />
+                            <LooptimeMonitor id={0} socket={socket}/>
                         </FlexRow>
                     </div>
                 </div>

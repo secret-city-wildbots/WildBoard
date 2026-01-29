@@ -1,13 +1,8 @@
-import { h, Fragment } from "preact";
+import { h } from "preact";
 
-import { Socket } from "socket.io-client";
 import ChecklistItem from "../components/ChecklistItem.tsx";
 
-interface ChecklistProps {
-    socket: Socket;
-}
-
-const Checklist = ({ socket }: ChecklistProps) => {
+export default function() {
     return (
         <ul>
             <ChecklistItem text="do the first step" />
@@ -20,5 +15,3 @@ const Checklist = ({ socket }: ChecklistProps) => {
         </ul>
     );
 };
-
-export default Checklist;

@@ -21,12 +21,73 @@ public class Robot extends TimedRobot {
    */
   public Robot() {
     dashboard = new WildBoard(5804);
+
+    //Checklist
+    dashboard.addTab(new Tab()
+      .addChild(new Checklist())
+      .setTitle("Checklist")
+    );
+
+    //Setup
+    dashboard.addTab(new Tab()
+      .setTitle("Setup/Auto")
+    );
+
+    //TeleOp
+    dashboard.addTab(new Tab()
+      .setTitle("TeleOp")
+    );
+
+    //Subsystems
+    dashboard.addTab(new Tab()
+      .addChild(
+        new Col(4).addChild(
+          new Placeholder("SWERVES", 30)
+        ).addChild(
+          new Placeholder("teST", 10)
+        )
+      )
+      .addChild(
+        new Col(3).addChild(
+          new Placeholder("Climb", 20)
+        ).addChild(
+          new Placeholder("BLAH", 10)
+        )
+      )
+      .addChild(
+        new Col(5).addChild(
+          new Placeholder("Shooter", 20)
+        )
+      )
+      .setTitle("Subsystems")
+    );
+
+    //Testing
+    dashboard.addTab(new Tab()
+      .addChild(
+        new Col(3).addChild(
+          new LooptimeMonitor()
+        )
+      ).addChild(
+        new Col(6).addChild(
+          new LooptimeMonitor()
+        )
+      ).addChild(
+        new Col(3).addChild(
+          new LooptimeMonitor()
+        )
+      )
+      .setTitle("TESt")
+    );
+
     dashboard.addPanel(new LooptimeMonitor());
     dashboard.start();
   }
-
+ 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    dashboard.update();
+  }
 
   @Override
   public void autonomousInit() {}

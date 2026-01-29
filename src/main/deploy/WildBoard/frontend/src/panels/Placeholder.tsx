@@ -1,22 +1,15 @@
-import { h, Fragment } from "preact";
+import { h } from "preact";
 
-import { Socket } from "socket.io-client";
-import DashboardItem from "../components/DashboardItem.tsx";
-
-interface PlaceholderProps {
-    text: string;
-    height?: number;
+interface Props {
+  text: String;
+  height?: number;
 }
 
-const Placeholder = ({ text, height = 5 }: PlaceholderProps) => {
+export default function({text, height = 5}: Props) {
 
     return (
-        <DashboardItem>
-            <div style={`width: 100%; text-align: center; height:${height}rem; font-size: 2rem;`}>
-                {text}
-            </div>
-        </DashboardItem>
+        <div style={`width: 100%; text-align: center; height:${height}rem; font-size: 2rem;`}>
+            {text}
+        </div>
     );
 };
-
-export default Placeholder;

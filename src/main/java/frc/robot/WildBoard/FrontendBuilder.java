@@ -1,6 +1,8 @@
 package frc.robot.WildBoard;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,8 +13,24 @@ public class FrontendBuilder {
         File deployDir = Filesystem.getDeployDirectory();
         File frontendDir = new File(deployDir, "WildBoard/frontend");
 
+        File tmp;
+        if (RobotBase.isSimulation()) {
+            tmp = new File(Filesystem.getOperatingDirectory(), "sim/tmp");
+        } else {
+            tmp = new File("/tmp");
+        }
+
+        File wildboardHome;
+        if (RobotBase.isSimulation()) {
+            wildboardHome = new File(Filesystem.getOperatingDirectory(), "sim/home");
+        } else {
+            wildboardHome = new File("/home/lvuser/WildBoard");
+        }
+
+        tmp.mkdirs();
+
         File esbuildSrc = new File(frontendDir, "src/esbuild");
-        File esbuildTmp = new File("/tmp/esbuild");
+        File esbuildTmp = new File(tmp, "esbuild");
 
         // Copy esbuild only if missing or file size differs
         try {
@@ -32,11 +50,15 @@ public class FrontendBuilder {
         }
 
         // Output directory in /tmp (writable)
-        File outputDir = new File("/tmp/frontend-public");
+        File outputDir = new File(tmp, "frontend-public/dynamic");
         outputDir.mkdirs();
 
-        File indexLoader = new File(frontendDir, "src/pages/indexLoader.tsx");
+        File indexLoader = new File(wildboardHome, "frontend/src/pages/indexLoader.tsx");;
 
+        if (RobotBase.isSimulation()) {
+            esbuildTmp = new File(tmp, "esbuild.exe");
+        }
+        
         // Build command using the /tmp copy
         ProcessBuilder pb = new ProcessBuilder(
             esbuildTmp.getAbsolutePath(),
