@@ -24,11 +24,14 @@ export class WsEventBus {
 
     this.ws.onmessage = (event) => {
       if (typeof event.data !== "string") return;
-      this.handleMessage(event.data);
+
+      if (!this.handleMessage(event.data)) {
+        console.log("Recieved ws message: "+event.data);
+      }
     };
   }
 
-  private handleMessage(msg: string) {
+  private handleMessage(msg: string): boolean|undefined {
     // Expected format: e[id].[data]
     if (!msg.startsWith("e")) return;
 
@@ -47,7 +50,10 @@ export class WsEventBus {
     for (const handler of listeners) {
       handler(data);
     }
+
+    return true;
   }
+
 
   /**
    * Subscribe to messages with a specific ID.
@@ -68,6 +74,13 @@ export class WsEventBus {
         this.handlers.delete(id);
       }
     };
+  }
+
+  /**
+   * send message based on id
+   */
+  send(id: number, msg: string) {
+    this.sendRaw("r"+id+"."+msg)
   }
 
   /**

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotBase;
 
 public class WildBoard {
     private Server server;
@@ -38,12 +39,21 @@ public class WildBoard {
     }
 
     private void clientBuild() {
+        File wildboardHome;
+        if (RobotBase.isSimulation()) {
+            wildboardHome = new File(Filesystem.getOperatingDirectory(), "sim/home");
+        } else {
+            wildboardHome = new File("/home/lvuser/WildBoard");
+        }
         File deployDir = Filesystem.getDeployDirectory();
         File frontendDir = new File(deployDir, "WildBoard/frontend");
 
         File indexStub = new File(frontendDir, "src/pages/indexStub.tsx");
-        File indexFinalDir = new File("/home/lvuser/WildBoard/frontend/src/pages");
-        File indexFinal = new File("/home/lvuser/WildBoard/frontend/src/pages/index.tsx");
+        File indexFinalDir = new File(wildboardHome, "frontend/src/pages");
+        File indexFinal = new File(wildboardHome, "frontend/src/pages/index.tsx");
+
+        File indexLoader = new File(frontendDir, "src/pages/indexLoader.tsx");
+        File indexLoaderFinal = new File(wildboardHome, "frontend/src/pages/indexLoader.tsx");
 
         indexStub.setReadable(true);
         indexFinal.setReadable(true);
@@ -56,22 +66,32 @@ public class WildBoard {
             String sidepanels = "";
             String imports = "";
 
-            for (Tab tab: this.tabs) {
+            for (Tab tab : this.tabs) {
                 tabs = tabs + tab.generate();
-                imports+= tab.genImport() + "\n";
+                imports += tab.genImport() + "\n";
             }
-            for (WBPanel panel: this.panels) {
-                sidepanels = sidepanels + "<div class=\"column-item\" style=\"padding-bottom: 0;\">\r\n" + panel.generate() + "\n</div>";
-                imports+= panel.genImport() + "\n";
+            for (WBPanel panel : this.panels) {
+                sidepanels = sidepanels + "<div class=\"column-item\" style=\"padding-bottom: 0;\">\r\n"
+                        + panel.generate() + "\n</div>";
+                imports += panel.genImport() + "\n";
             }
 
             index = index.replace("[TABS]", tabs)
-                .replace("[SIDEPANELS]", sidepanels)
-                .replace("[IMPORTS]", imports);
+                    .replace("[SIDEPANELS]", sidepanels)
+                    .replace("[IMPORTS]", imports)
+                    .replaceAll("\\[DEPLOY\\]", deployDir.getCanonicalPath().replaceAll("\\\\", "/"));
 
             indexFinalDir.mkdirs();
             Files.writeString(indexFinal.toPath(), index);
-        } catch(IOException err) {
+
+            // fix loader import for sim
+            Files.writeString(indexLoaderFinal.toPath(),
+                    Files.readString(indexLoader.toPath())
+                    .replaceAll("\\[DEPLOY\\]", deployDir.getCanonicalPath().replaceAll("\\\\", "/"))
+                    .replaceAll("\\[HOME\\]", wildboardHome.getCanonicalPath().replaceAll("\\\\", "/")));
+
+            System.out.println(wildboardHome.getCanonicalPath());
+        } catch (IOException err) {
             System.out.println("couldn't read/write file in frontend construction process.");
             System.err.println(err);
         }
@@ -82,7 +102,7 @@ public class WildBoard {
     private void serverStart() {
         server = new Server(PORT);
 
-        //startup panels
+        // startup panels
         for (int i = 0; i < panels.size(); i++) {
             WBPanel wbPanel = panels.get(i);
 
@@ -99,7 +119,7 @@ public class WildBoard {
      * to function properly
      */
     public void update() {
-        //update all panels
+        // update all panels
         for (WBPanel wbPanel : panels) {
             wbPanel.update();
         }

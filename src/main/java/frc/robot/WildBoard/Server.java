@@ -4,9 +4,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import edu.wpi.first.wpilibj.Filesystem;
-import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
+import edu.wpi.first.wpilibj.RobotBase;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -19,6 +18,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
+
 public class Server {
 
     private final Path publicDir;
@@ -30,20 +33,29 @@ public class Server {
      */
     public Server(int port) {
         try {
+            File tmp;
+            if (RobotBase.isSimulation()) {
+                tmp = new File(Filesystem.getOperatingDirectory(), "sim/tmp");
+            } else {
+                tmp = new File("/tmp");
+            }
+
             publicDir = Filesystem.getDeployDirectory().toPath().resolve("WildBoard/frontend/public");
+            Path dynamicDir = new File(tmp, "frontend-public").toPath();
 
             // --- HTTP Server ---
             httpServer = HttpServer.create(new InetSocketAddress(port), 0);
+            httpServer.createContext("/dynamic/", new StaticFileHandler(dynamicDir));
             httpServer.createContext("/", new StaticFileHandler(publicDir));
             httpServer.setExecutor(null);
 
             // --- WebSocket Server ---
-            ws = new WsServer(port+1);
+            ws = new WsServer(port + 1);
             ws.on("ping", (socket, data) -> {
                 ws.emit(socket, "pong", "");
             });
 
-            System.out.println("HTTP + WebSocket server running on port " + (port+1));
+            System.out.println("HTTP + WebSocket server running on port " + (port + 1));
             System.out.println("Serving files from: " + publicDir.toAbsolutePath());
 
         } catch (IOException e) {
@@ -78,7 +90,8 @@ public class Server {
             }
 
             String requestPath = exchange.getRequestURI().getPath();
-            if (requestPath.equals("/")) requestPath = "/index.html";
+            if (requestPath.equals("/"))
+                requestPath = "/index.html";
 
             Path filePath;
             if (requestPath.equals("/index.js")) {
@@ -92,13 +105,14 @@ public class Server {
             }
 
             if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
-                //get the mime type
-                String mimeType = URLConnection.guessContentTypeFromName(filePath.toString()); 
+                // get the mime type
+                String mimeType = URLConnection.guessContentTypeFromName(filePath.toString());
 
-                //if it doesn't have mime type set to default of octet-stream
-                if (mimeType == null) mimeType = "application/octet-stream";
+                // if it doesn't have mime type set to default of octet-stream
+                if (mimeType == null)
+                    mimeType = "application/octet-stream";
 
-                //read file and send response
+                // read file and send response
                 byte[] fileBytes = Files.readAllBytes(filePath);
                 exchange.getResponseHeaders().set("Content-Type", mimeType);
                 exchange.sendResponseHeaders(200, fileBytes.length);

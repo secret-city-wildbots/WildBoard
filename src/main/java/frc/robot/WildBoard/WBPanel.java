@@ -10,6 +10,7 @@ public class WBPanel {
     public ArrayList<WBPanel> children = new ArrayList<>();
     private Dictionary<String, String> props = new Hashtable<>();
     private Dictionary<String, Integer> intprops = new Hashtable<>();
+    private ArrayList<String> boolprops = new ArrayList<>();
     public boolean usesML = false;
     public int id;
     public MessageLayer ml;
@@ -26,6 +27,9 @@ public class WBPanel {
     }
     public void addProp(String key, int val) {
         this.intprops.put(key, val);
+    }
+    public void addProp(String key, boolean val) {
+        if (val) this.boolprops.add(key);
     }
 
     public void appendToProp(String key, String val) {
@@ -108,6 +112,6 @@ public class WBPanel {
      * Method that outputs the import statement
      */
     public String genImport() {
-        return "import " + panelName + " from \"/home/lvuser/deploy/WildBoard/frontend/src/panels/"+ panelName +".tsx\";";
+        return "import " + panelName + " from \"[DEPLOY]/WildBoard/frontend/src/panels/"+ panelName +".tsx\";";
     }
 }

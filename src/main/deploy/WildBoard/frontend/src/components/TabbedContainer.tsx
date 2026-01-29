@@ -45,8 +45,15 @@ export default function TabbedContainer({ tabs }: TabbedContainerProps) {
           </button>
         ))}
       </div>
-      <div style={{ paddingTop: "1rem" }}>
-        {tabs[activeIndex]?.content}
+      <div style={{ paddingTop: "0rem" }}>
+        {tabs.map((tab, index) => (
+          <div
+            key={index}
+            style={{ display: activeIndex === index ? "block" : "none" }}
+          >
+            {tab.content}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ public class Col extends WBPanel {
             if (panel.getPanelName() == "DashboardSubRow") {
                 childrenString+=panel.generate();
             } else {
-                childrenString+= "<div class=\"column-item\">" + panel.generate() + "</div>";
+                childrenString+= "<div class=\"column-item bubble\">" + panel.generate() + "</div>";
             }
         }
         return "<div class=\"col-"+this.width+" column\">"+childrenString+"</div>";

@@ -36,6 +36,6 @@ public class Tab extends WBPanel {
         for (WBPanel child: this.children) {
             childString+=child.generate();
         }
-        return "{title: \""+this.title+"\",content: (<Container><div class=\"row bubble\">"+childString+"</div></Container>)},";
+        return "{title: \""+this.title+"\",content: (<Container><div class=\"row\">"+childString+"</div></Container>)},";
     }
 }
