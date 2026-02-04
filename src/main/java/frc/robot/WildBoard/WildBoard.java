@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -15,6 +16,7 @@ public class WildBoard {
     private Server server;
     private int PORT = 5804;
     private ArrayList<WBPanel> panels = new ArrayList<WBPanel>();
+    private ArrayList<WBPanel> updatePanels = new ArrayList<WBPanel>();
     private ArrayList<Tab> tabs = new ArrayList<Tab>();
 
     public WildBoard() {
@@ -87,8 +89,8 @@ public class WildBoard {
             // fix loader import for sim
             Files.writeString(indexLoaderFinal.toPath(),
                     Files.readString(indexLoader.toPath())
-                    .replaceAll("\\[DEPLOY\\]", deployDir.getCanonicalPath().replaceAll("\\\\", "/"))
-                    .replaceAll("\\[HOME\\]", wildboardHome.getCanonicalPath().replaceAll("\\\\", "/")));
+                            .replaceAll("\\[DEPLOY\\]", deployDir.getCanonicalPath().replaceAll("\\\\", "/"))
+                            .replaceAll("\\[HOME\\]", wildboardHome.getCanonicalPath().replaceAll("\\\\", "/")));
 
             System.out.println(wildboardHome.getCanonicalPath());
         } catch (IOException err) {
@@ -102,16 +104,38 @@ public class WildBoard {
     private void serverStart() {
         server = new Server(PORT);
 
+        AtomicInteger mlId = new AtomicInteger(0);
+
         // startup panels
-        for (int i = 0; i < panels.size(); i++) {
-            WBPanel wbPanel = panels.get(i);
+        for (int i2 = 0; i2 < panels.size(); i2++) {
+            WBPanel wbPanel = panels.get(i2);
 
             if (wbPanel.usesML) {
-                System.out.println("assigned ml id " + i);
-                wbPanel.assignML(new MessageLayer(server, i), i);
+                int id = mlId.getAndIncrement();
+                System.out.println("assigned ml id " + id);
+                wbPanel.assignML(new MessageLayer(server, id), id);
+
+                this.updatePanels.add(wbPanel);
             }
             wbPanel.start();
         }
+
+        // recursive panels
+        for (int i2 = 0; i2 < tabs.size(); i2++) {
+            WBPanel wbPanel = tabs.get(i2);
+
+            WBPanelUtils.traverse(wbPanel, panel -> {
+                if (panel.usesML) {
+                    int id = mlId.getAndIncrement();
+                    panel.assignML(new MessageLayer(server, id), id);
+
+                    this.updatePanels.add(panel);
+                }
+
+                panel.start();
+            });
+        }
+
     }
 
     /*
@@ -120,7 +144,7 @@ public class WildBoard {
      */
     public void update() {
         // update all panels
-        for (WBPanel wbPanel : panels) {
+        for (WBPanel wbPanel : updatePanels) {
             wbPanel.update();
         }
     }

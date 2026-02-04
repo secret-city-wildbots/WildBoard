@@ -26,7 +26,9 @@ export class WsEventBus {
       if (typeof event.data !== "string") return;
 
       if (!this.handleMessage(event.data)) {
-        console.log("Recieved ws message: "+event.data);
+        console.log("[WS] Recieved raw ws message: "+event.data);
+      } else {
+        //console.info("[WS] event recieved: "+event.data)
       }
     };
   }

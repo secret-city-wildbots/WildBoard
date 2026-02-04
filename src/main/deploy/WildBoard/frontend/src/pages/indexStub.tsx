@@ -17,7 +17,7 @@ export default function () {
                 <div class="col column" style="padding: 0;padding-left: 1rem;">
                     <TabbedContainer tabs={tabs} />
                 </div>
-                <div class="col column" style="flex: 0 0 12rem;">
+                <div class="col column sidepanel" style="flex: 0 0 14rem;">
                     [SIDEPANELS]
                 </div>
             </div>

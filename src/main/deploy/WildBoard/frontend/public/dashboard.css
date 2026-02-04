@@ -55,7 +55,11 @@ body {
     padding-left: 0;
 }
 
-/*.column:not(:first-child)::before {
+.sidepanel.column {
+    padding: 0.25rem;
+}
+
+.sidepanel.column:not(:first-child)::before {
     content: "";
     position: absolute;
     top: 0;
@@ -66,7 +70,7 @@ body {
         to bottom,
         rgba(116, 255, 6, 0.8)
     );
-}*/
+}
 
 .row {
     width: 100%;

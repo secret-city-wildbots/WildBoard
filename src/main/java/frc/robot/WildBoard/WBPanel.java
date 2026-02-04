@@ -100,6 +100,11 @@ public class WBPanel {
             propsString = propsString + key + "={" + intprops.get(key) + "} ";
         }
 
+        //add bool props
+        for (String key: this.boolprops) {
+            propsString = propsString + key + " ";
+        }
+
         String childrenString = "";
         for (WBPanel panel: this.children) {
             childrenString = childrenString + panel.generate();
@@ -112,6 +117,10 @@ public class WBPanel {
      * Method that outputs the import statement
      */
     public String genImport() {
-        return "import " + panelName + " from \"[DEPLOY]/WildBoard/frontend/src/panels/"+ panelName +".tsx\";";
+        String childImports = "";
+        for (WBPanel child: this.children) {
+            childImports+=child.genImport()+"\n";
+        }
+        return childImports+"import " + panelName + " from \"[DEPLOY]/WildBoard/frontend/src/panels/"+ panelName +".tsx\";";
     }
 }

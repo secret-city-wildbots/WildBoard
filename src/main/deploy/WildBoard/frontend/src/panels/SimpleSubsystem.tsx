@@ -38,11 +38,13 @@ export default function ({
         const index = data.indexOf(",");
         if (index < 0) return;
 
-        let pos = data.substring(1,index);
-        let temp = data.substring(index + 1);
+        let pos = data.substring(0,index);
+        let temp = data.substring(index+1);
 
-        setPos(pos.length > 3 ? pos.substring(1,3):pos);
-        setTemp(temp.length > 3 ? temp.substring(1,3):temp);
+        setPos(pos.length > 3 ? pos.substring(0,3):pos);
+        setTemp(temp.length > 3 ? temp.substring(0,3):temp);
+
+        console.info(data);
     });
 
     const onToggle = (on: boolean) => {

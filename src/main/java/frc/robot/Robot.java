@@ -15,6 +15,13 @@ import frc.robot.WildBoard.Panels.*;
  */
 public class Robot extends TimedRobot {
   public static WildBoard dashboard;
+
+  final VelocitySimpleSubsystem WBshooter;
+  final VelocitySimpleSubsystem WBintake;
+  final VelocitySimpleSubsystem WBfunnel;
+  final VelocitySimpleSubsystem WBindexer;
+  final SimpleSubsystem WBturret;
+  final SimpleSubsystem WBhood;
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -39,9 +46,16 @@ public class Robot extends TimedRobot {
     );
 
     //Subsystems
+    WBshooter = new VelocitySimpleSubsystem("Shooter");
+    WBintake = new VelocitySimpleSubsystem("Intake");
+    WBindexer = new VelocitySimpleSubsystem("Indexer");
+    WBfunnel = new VelocitySimpleSubsystem("Funnel");
+
+    WBturret = new SimpleSubsystem("Turret", false);
+    WBhood = new SimpleSubsystem("Turret Hood", true);
     dashboard.addTab(new Tab()
       .addChild(
-        new Col(4).addChild(
+        new Col(5).addChild(
           new Placeholder("SWERVES", 30)
         ).addChild(
           new Placeholder("teST", 10)
@@ -55,8 +69,24 @@ public class Robot extends TimedRobot {
         )
       )
       .addChild(
-        new Col(5).addChild(
-          new Placeholder("Shooter", 20)
+        new Col(4).addChild(
+          new Row().addChild(
+            WBshooter
+          ).addChild(
+            WBintake
+          )
+        ).addChild(
+          new Row().addChild(
+            WBindexer
+          ).addChild(
+            WBfunnel
+          )
+        ).addChild(
+          new Row().addChild(
+            WBturret
+          ).addChild(
+            WBhood
+          )
         )
       )
       .setTitle("Subsystems")
@@ -86,6 +116,14 @@ public class Robot extends TimedRobot {
  
   @Override
   public void robotPeriodic() {
+    WBshooter.updateVals(10+Math.round(Math.random()*5), 42);
+    WBintake.updateVals(8+Math.round(Math.random()*0.55), 37);
+    WBfunnel.updateVals(4+Math.round(Math.random()*0.6), 36);
+    WBindexer.updateVals(0, 31);
+
+    WBturret.updateVals(289+Math.round(Math.random()*0.6)*10, 33);
+    WBhood.updateVals(21+Math.round(Math.random()*0.6)*2, 31);
+
     dashboard.update();
   }
 

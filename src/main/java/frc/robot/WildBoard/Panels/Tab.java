@@ -25,7 +25,7 @@ public class Tab extends WBPanel {
     public String genImport() {
         String childImports = "";
         for (WBPanel child: this.children) {
-            childImports+=child.genImport();
+            childImports+=child.genImport()+"\n";
         }
         return childImports;
     }
