@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -60,10 +61,6 @@ public class Server {
     public void start() {
         httpServer.start();
         ws.start();
-    }
-
-    public void setOnMsg(BiConsumer<Integer, String> onMsg) {
-        this.ws.onMsg = onMsg;
     }
 
     // --------------------------
@@ -135,7 +132,7 @@ public class Server {
         private final Set<WebSocket> clients = Collections.synchronizedSet(new HashSet<>());
         private final ObjectMapper mapper = new ObjectMapper();
         private final Map<String, List<BiConsumer<WebSocket, Object>>> eventHandlers = new ConcurrentHashMap<>();
-        public BiConsumer<Integer, String> onMsg;
+        public Map<Integer, Consumer<String>> onMsg;
 
         // ===== BATCHING =====
         private final StringBuilder batch = new StringBuilder();
@@ -143,6 +140,8 @@ public class Server {
 
         public WsServer(int port) {
             super(new InetSocketAddress(port));
+            
+            onMsg = new ConcurrentHashMap<>();
         }
 
         @Override
@@ -172,7 +171,7 @@ public class Server {
                     int id = Integer.parseInt(message.substring(1, dot));
                     String payload = message.substring(dot + 1);
 
-                    onMsg.accept(id, payload);
+                    onMsg.get(id).accept(payload);
                 } catch (Exception e) {
                     System.err.println("Invalid message: " + message);
                 }
@@ -189,11 +188,14 @@ public class Server {
             System.out.println("WebSocket server ready");
         }
 
-        // ===== SAFE BATCHING =====
         public void enqueue(String msg) {
             synchronized (batchLock) {
                 batch.append(msg.length()).append(':').append(msg);
             }
+        }
+
+        public void bind(int id, Consumer<String> handler) {
+            onMsg.put(id, handler);
         }
 
         public void flush() {

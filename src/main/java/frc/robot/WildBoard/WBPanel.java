@@ -64,8 +64,18 @@ public class WBPanel {
     }
 
     public void assignML(MessageLayer ml, int id) {
+        if (this.ml == null) {
+            ml.bind(this::onMsg);
+        }
         this.ml = ml;
         this.id = id;
+    }
+
+    /**
+     * Does nothing by default, override to run it when a message is received from the dashboard
+     * @param msg
+     */
+    public void onMsg(String msg) {
     }
 
     public String generate() {

@@ -81,7 +81,7 @@ body {
 }
 
 .tab-selector {
-    padding: 0.3em 1em;
+    padding: 0.15em 1em;
     cursor: pointer;
     border: none !important;
     background: none !important;
@@ -489,16 +489,11 @@ input[type="number"] {
 
 .popover {
     background-color: #202022 !important;
-    /* same as your dashboard bg */
     border: 2px solid rgba(68, 142, 205, 0.7) !important;
-    /* neon border */
     border-radius: 10px;
     color: #eed !important;
-    /* light text */
     max-width: 200px;
-    /* optional */
     box-shadow: 0 0 12px rgba(68, 142, 205, 0.4);
-    /* subtle glow */
 }
 
 .popover .popover-header {
@@ -524,5 +519,39 @@ input[type="number"] {
 .popover.bs-popover-start .arrow::before,
 .popover.bs-popover-end .arrow::before {
     border-color: #202022 !important;
-    /* arrow matches dark bg */
+}
+
+/* Overrides */
+
+.switch-grid {
+    display: grid;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.switch-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.75rem 0.5rem;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.switch-grid-item:hover {
+    background: rgba(255, 1, 152, 0.08);
+}
+
+.switch-grid-label {
+    margin-bottom: 0.6rem;
+    text-align: center;
+    letter-spacing: 0.5px;
 }
