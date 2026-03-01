@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 
 public class WildBoard {
     private Server server;
@@ -18,6 +19,8 @@ public class WildBoard {
     private ArrayList<WBPanel> panels = new ArrayList<WBPanel>();
     private ArrayList<WBPanel> updatePanels = new ArrayList<WBPanel>();
     private ArrayList<Tab> tabs = new ArrayList<Tab>();
+    private double lastTime_s;
+    public static double loopTime_ms;
 
     public WildBoard() {
     }
@@ -38,6 +41,7 @@ public class WildBoard {
         serverStart();
         clientBuild();
         this.server.start();
+        lastTime_s = Timer.getTimestamp();
     }
 
     private void clientBuild() {
@@ -147,5 +151,11 @@ public class WildBoard {
         for (WBPanel wbPanel : updatePanels) {
             wbPanel.update();
         }
+
+        server.ws.flush();
+
+        double curTime_s = Timer.getTimestamp();
+        loopTime_ms = Math.floor((curTime_s - lastTime_s)*1000);
+        lastTime_s = curTime_s;
     }
 }

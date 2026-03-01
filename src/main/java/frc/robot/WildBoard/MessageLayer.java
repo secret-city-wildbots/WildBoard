@@ -1,7 +1,7 @@
 package frc.robot.WildBoard;
 
 public class MessageLayer {
-    private Server server;
+    public Server server;
     public int elemID;
 
     public MessageLayer(Server server, int elemID) {
@@ -10,6 +10,7 @@ public class MessageLayer {
     }
 
     public void send(String msg) {
-        this.server.ws.broadcast("e"+elemID+"."+msg);
+        // enqueue instead of immediate websocket send
+        this.server.ws.enqueue("e" + elemID + "." + msg);
     }
 }

@@ -3,7 +3,8 @@ import ArmableButton from "../components/ArmableButton.tsx";
 import Switch from "../components/Switch.tsx";
 import { WsEventBus } from "../ws/WSEventBus.ts";
 import Readout from "../components/Readout.tsx";
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
+import FlexRow from "../components/FlexRow.tsx";
 
 interface Props {
     absolute?: boolean;
@@ -22,7 +23,7 @@ export default function ({
     unit,
     fillContainer = false,
     velocity = false,
-    precision = 0,
+    precision,
     name,
     id,
     socket,
@@ -31,21 +32,27 @@ export default function ({
     const [temp, setTemp] = useState("_");
 
     if (!unit) {
-        unit = velocity ? "rpm" : "deg";
+        unit = velocity ? "rps" : "deg";
     }
 
-    socket.subscribe(id, (data:string) => {
-        const index = data.indexOf(",");
-        if (index < 0) return;
+    if (precision === undefined) {
+        precision = velocity ? 1 : 0;
+    }
 
-        let pos = data.substring(0,index);
-        let temp = data.substring(index+1);
+    useEffect(() => {
+        const unsubscribe = socket.subscribe(id, (data: string) => {
+            const index = data.indexOf(",");
+            if (index < 0) return;
 
-        setPos(pos.length > 3 ? pos.substring(0,3):pos);
-        setTemp(temp.length > 3 ? temp.substring(0,3):temp);
+            let posVal = data.substring(0, index);
+            let tempVal = data.substring(index + 1);
 
-        console.info(data);
-    });
+            setPos(Number(posVal).toFixed(precision));
+            setTemp(Number(tempVal).toFixed(1));
+        });
+
+        return () => unsubscribe();
+    }, [socket, id, precision]);
 
     const onToggle = (on: boolean) => {
         socket.send(id, on ? "ul" : "l");
@@ -69,6 +76,8 @@ export default function ({
                 justifyContent: "center",
                 flexDirection: "column",
                 padding: (fillContainer ? "0.5rem" : "1rem"),
+                paddingTop: "0.25rem",
+                paddingBottom: "0.25rem",
             }}
         >
             <label>{name}</label>
@@ -87,27 +96,22 @@ export default function ({
                 <></>
             )}
             {absolute ? (
-                <div style={{ //vertically align them in a row.
-                    //TODO should prob split this into a class.
-                    display: "flex",
-                    justifyContent: "center",
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}>
+                <div>
+                    <FlexRow noPadding>
+                        <label class="label-small pr-2">Unlock</label>
+                        <Switch onColor="#ef0001" offColor="rgba(116, 255, 6, 1)" onToggle={onToggle} />
+                    </FlexRow>
                     <div>
                         <div style="min-height: 2.5rem; margin-top: 1rem;" class="flex-row">
                             <label class="label-small pr-3">
                                 {velocity ? "Vel" : "Pos"} ({unit})
                             </label>
-                            <Readout text={pos} chars={3} />
+                            <Readout text={pos} chars={4} />
                         </div>
                         <div style="min-height: 2.5rem" class="flex-row">
                             <label class="label-small pr-3">Temp (C)</label>
-                            <Readout text={temp} temperature chars={3} />
+                            <Readout text={temp} chart temperature chars={4} />
                         </div>
-                    </div>
-                    <div style="margin-left: 0.25rem;">
-                        <Switch onColor="#ef0001" offColor="rgba(116, 255, 6, 1)" onToggle={onToggle} vertical />
                     </div>
                 </div>
             ) : (
@@ -116,11 +120,11 @@ export default function ({
                         <label class="label-small pr-2">
                             {velocity ? "Vel" : "Pos"} ({unit})
                         </label>
-                        <Readout text={pos} chars={3} />
+                        <Readout text={pos} chars={4} />
                     </div>
                     <div style="min-height: 2.5rem" class="flex-row">
                         <label class="label-small pr-3">Temp (C)</label>
-                        <Readout text={temp} temperature chars={3} />
+                        <Readout text={temp} chart temperature chars={4} />
                     </div>
                 </>
             )}
