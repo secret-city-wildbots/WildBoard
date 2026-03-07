@@ -1,6 +1,7 @@
 import { h } from "preact";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { WsEventBus } from "../ws/WSEventBus";
+import Button from "../components/Button";
 
 interface Props {
     socket: WsEventBus;
@@ -55,28 +56,33 @@ export default function ({
     }, [texts, descriptions]);
 
     return (
-        <div
-            class="grid-squares"
-            style={{
-                height: `${height}rem`,
-                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-                gridTemplateRows: `repeat(${rows}, 1fr)`
-            }}
-        >
-            {texts.map((text, i) => (
-                <div
-                    key={i}
-                    ref={(el) => {
-                        squareRefs.current[i] = el; // assign but return nothing
-                    }}
-                    class={`grid-square ${highlighted[i] ? "highlighted" : ""}`}
-                    tabIndex={0} // required for focus trigger
-                    data-bs-toggle="popover"
-                    data-bs-content={descriptions[i] || ""}
-                >
-                    {text}
-                </div>
-            ))}
+        <div style="flex: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100%;">
+            <div
+                class="grid-squares"
+                style={{
+                    height: `${height}rem`,
+                    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+                    gridTemplateRows: `repeat(${rows}, 1fr)`,
+                    marginBottom: "0.5rem",
+                }}
+            >
+                {texts.map((text, i) => (
+                    <div
+                        key={i}
+                        ref={(el) => {
+                            squareRefs.current[i] = el; // assign but return nothing
+                        }}
+                        class={`grid-square ${highlighted[i] ? "highlighted" : ""}`}
+                        tabIndex={0} // required for focus trigger
+                        onClick={() => socket.send(id, "t"+i)}
+                        data-bs-toggle="popover"
+                        data-bs-content={descriptions[i] || ""}
+                    >
+                        {text}
+                    </div>
+                ))}
+            </div>
+            <Button text="Clear Alarms" onClick={() => socket.send(id, "c")} />
         </div>
     );
 }

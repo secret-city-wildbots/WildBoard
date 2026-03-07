@@ -36,7 +36,7 @@ body {
 /* Random bits */
 
 .column-item {
-    padding: 0.25rem 0;
+    /*padding: 0.25rem 0;*/
     display: flex;
     justify-content: center;
     /* Center horizontally */
@@ -50,6 +50,7 @@ body {
 
 .column {
     padding: 0.5rem;
+    padding-left: 0;
     position: relative;
 }
 
@@ -397,20 +398,34 @@ input[type="number"] {
     background-color: green;
 }
 
-/* MasterStates */
+/* Master Alarms */
 
 .grid-squares {
     width: 100%;
     display: grid;
     box-sizing: border-box;
 
-    /* panel look (matches bubble/readout style) */
     background: rgba(0, 0, 0, 0.2);
     border: 2px solid rgba(68, 142, 205, 0.9);
     border-radius: 10px;
-
     overflow: hidden;
-    /* makes inner borders clean */
+
+    animation: master-flash 1s linear infinite;
+}
+
+@keyframes master-flash {
+
+    0%,
+    15%,
+    85%,
+    100% {
+        --alarm-on: 1;
+    }
+
+    35%,
+    65% {
+        --alarm-on: 0;
+    }
 }
 
 .grid-square {
@@ -426,7 +441,6 @@ input[type="number"] {
     background: rgba(255, 255, 255, 0.03);
     color: #eed;
 
-    /* subtle separators instead of heavy borders */
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
@@ -442,50 +456,22 @@ input[type="number"] {
 
 .grid-square.highlighted {
     color: #fff;
-    animation: flash-border 1s infinite;
-}
 
-@keyframes flash-border {
-    0% {
-        background: rgba(255, 1, 152, 0.25);
-        box-shadow: inset 0 0 12px rgba(255, 1, 152, 0.6);
-        border: 2px solid rgb(255, 1, 152);
-    }
+    background: rgba(255, 1, 152,
+            calc(0.15 + 0.1 * var(--alarm-on)));
 
-    15% {
-        background: rgba(255, 1, 152, 0.25);
-        box-shadow: inset 0 0 12px rgba(255, 1, 152, 0.6);
-        border: 2px solid rgb(255, 1, 152);
-    }
+    box-shadow: inset 0 0 calc(12px * var(--alarm-on)) rgba(255, 1, 152,
+            calc(0.6 * var(--alarm-on)));
 
-    35% {
-        background: rgba(255, 1, 152, 0.15);
-        box-shadow: none;
-        border: 2px solid transparent;
-    }
-
-    65% {
-        background: rgba(255, 1, 152, 0.15);
-        box-shadow: none;
-        border: 2px solid transparent;
-    }
-
-    85% {
-        background: rgba(255, 1, 152, 0.25);
-        box-shadow: inset 0 0 12px rgba(255, 1, 152, 0.6);
-        border: 2px solid rgb(255, 1, 152);
-    }
-
-    100% {
-        background: rgba(255, 1, 152, 0.25);
-        box-shadow: inset 0 0 12px rgba(255, 1, 152, 0.6);
-        border: 2px solid rgb(255, 1, 152);
-    }
+    border: 2px solid rgba(255, 1, 152,
+            calc(var(--alarm-on)));
 }
 
 .grid-square:hover {
-    background: rgba(255, 1, 152, 0.12);
+    background: rgba(68, 142, 205, 0.12);
 }
+
+/* Popover (unchanged) */
 
 .popover {
     background-color: #202022 !important;
@@ -498,7 +484,6 @@ input[type="number"] {
 
 .popover .popover-header {
     background-color: rgba(68, 142, 205, 0.1) !important;
-    /* soft header bg */
     color: #eed !important;
     font-weight: 600;
     border-bottom: 1px solid rgba(68, 142, 205, 0.3);
@@ -508,7 +493,6 @@ input[type="number"] {
 
 .popover .popover-body {
     background-color: transparent !important;
-    /* inherit main popover bg */
     color: #eed !important;
     font-size: 0.95rem;
     padding: 0.5rem 0.75rem;
@@ -552,6 +536,35 @@ input[type="number"] {
 
 .switch-grid-label {
     margin-bottom: 0.6rem;
+    padding-right: 0 !important;
     text-align: center;
     letter-spacing: 0.5px;
+}
+
+/* Field Map */
+.field-map {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    min-height: 364px;
+    height:100%;
+
+    display: flex;
+}
+
+.field-map-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.field-map-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }

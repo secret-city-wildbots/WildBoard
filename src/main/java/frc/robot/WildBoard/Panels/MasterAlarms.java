@@ -3,10 +3,10 @@ package frc.robot.WildBoard.Panels;
 import frc.robot.WildBoard.WBPanel;
 
 public class MasterAlarms extends WBPanel {
-    private boolean[] oldAlarms;
     private int repeats = 0;
-    private int repeatInterval = 25 + (int) Math.round(Math.random() * 10); // add some randomization to prevent offset panels
-    public boolean[] alarms;
+    private int repeatInterval = 45 + (int) Math.round(Math.random() * 10); // add some randomization to prevent offset panels
+    private boolean alarmsChanged = false;
+    private boolean[] alarms;
 
     public MasterAlarms(String[] labels, int cols) {
         this.usesML = true;
@@ -15,7 +15,6 @@ public class MasterAlarms extends WBPanel {
         for (int i = 0; i < this.alarms.length; i++) {
             this.alarms[i] = false;
         }
-        this.oldAlarms = this.alarms.clone();
 
         this.setPanelName("MasterAlarms");
         this.addRawProp("texts", "[\"" + String.join("\",\"", labels) + "\"]");
@@ -29,7 +28,6 @@ public class MasterAlarms extends WBPanel {
         for (int i = 0; i < this.alarms.length; i++) {
             this.alarms[i] = false;
         }
-        this.oldAlarms = this.alarms.clone();
 
         this.setPanelName("MasterAlarms");
         this.addRawProp("texts", "[\"" + String.join("\",\"", labels) + "\"]");
@@ -39,14 +37,21 @@ public class MasterAlarms extends WBPanel {
 
     public void triggerAlarm(int index) {
         this.alarms[index] = true;
+        this.alarmsChanged = true;
     }
 
     public void clearAlarm(int index) {
         this.alarms[index] = false;
+        this.alarmsChanged = true;
     }
 
     public void setAlarm(int index, boolean value) {
         this.alarms[index] = value;
+        this.alarmsChanged = true;
+    }
+
+    public boolean[] getAlarms() {
+        return this.alarms;
     }
 
     private static String boolArrayToBinaryString(boolean[] arr) {
@@ -60,13 +65,31 @@ public class MasterAlarms extends WBPanel {
     }
 
     @Override
+    public void onMsg(String msg) {
+        if (msg.startsWith("c")) {
+            for (int i = 0; i < this.alarms.length; i++) {
+                this.alarms[i] = false;
+            }
+            this.alarmsChanged = true;
+        }
+        if (msg.startsWith("t")) {
+            int index = Integer.parseInt(msg.substring(1));
+            if (this.alarms[index]) {
+                return;
+            }
+            this.alarms[index] = true;
+            this.alarmsChanged = true;
+        }
+    }
+
+    @Override
     public void update() {
-        if (java.util.Arrays.equals(this.oldAlarms, this.alarms) && repeats < repeatInterval) {
+        if (!alarmsChanged && repeats < repeatInterval) {
             repeats++;
             return;
         }
         this.ml.send(boolArrayToBinaryString(this.alarms));
-        oldAlarms = this.alarms.clone();
+        alarmsChanged = false;
         repeats = 0;
     }
 }

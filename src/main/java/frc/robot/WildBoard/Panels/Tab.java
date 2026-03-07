@@ -13,6 +13,10 @@ public class Tab extends WBPanel {
         return this;
     }
 
+    public String getTitle() {
+        return this.title;
+    }
+
     /**
      * Add a child
      */

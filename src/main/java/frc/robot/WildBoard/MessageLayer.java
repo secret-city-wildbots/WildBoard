@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 public class MessageLayer {
     public Server server;
     public int elemID;
+    private String queue = "";
 
     public MessageLayer(Server server, int elemID) {
         this.server = server;
@@ -13,7 +14,12 @@ public class MessageLayer {
 
     public void send(String msg) {
         // enqueue instead of immediate websocket send
-        this.server.ws.enqueue("e" + elemID + "." + msg);
+        this.queue+=("e" + elemID + "." + msg);
+    }
+
+    public void update() {
+        this.server.ws.enqueue(queue);
+        queue = "";
     }
 
     /**

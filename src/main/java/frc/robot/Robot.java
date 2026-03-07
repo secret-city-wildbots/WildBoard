@@ -58,7 +58,7 @@ public class Robot extends TimedRobot {
     dashboard.addTab(new Tab()
         .setTitle("TeleOp")
         .addChild(new Col(2).addChild(
-            new Placeholder("MAP", 100)))
+            new FieldMap()))
         .addChild(new Col(6).addChild(
             new Row().addChild(
                 new CameraFeed(5801)).addChild(
@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
                     new CameraFeed(5803)).addChild(
                         new CameraFeed(5804))))
         .addChild(new Col(4).addChild(
-            new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode", "Disable Drive Smoothing", "Manual Climb", "Manual Aim" }, 2))));
+            new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode", "Disable Shot Smoothing", "Manual Climb", "Manual Aim" }, 2))));
 
     // Subsystems
     WBshooter = new VelocitySimpleSubsystem("Shooter");
@@ -192,8 +192,6 @@ public class Robot extends TimedRobot {
     }
 
     WBswerveModules.updateVals(swervePoses, swerveTemps, swerveVels);
-
-    WBalarms.triggerAlarm(0);
 
     WBturret.onUnlock((Boolean locked) -> {
       System.out.println("turret " + (locked ? "locked" : "unlocked"));

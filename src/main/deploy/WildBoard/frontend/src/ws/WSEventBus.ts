@@ -56,6 +56,7 @@ export class WsEventBus {
         return;
       }
 
+      console.info(event.data);
       // DO NOT parse immediately — queue it
       this.incomingQueue.push(event.data);
     };

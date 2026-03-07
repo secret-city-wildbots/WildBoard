@@ -18,7 +18,9 @@ public class WildBoard {
     private int PORT = 5804;
     private ArrayList<WBPanel> panels = new ArrayList<WBPanel>();
     private ArrayList<WBPanel> updatePanels = new ArrayList<WBPanel>();
+    private ArrayList<WBPanel> updatePanelsTeleOp = new ArrayList<WBPanel>();
     private ArrayList<Tab> tabs = new ArrayList<Tab>();
+    private Overrides overrides;
     private double lastTime_s;
     public static double loopTime_ms;
 
@@ -120,20 +122,27 @@ public class WildBoard {
                 wbPanel.assignML(new MessageLayer(server, id), id);
 
                 this.updatePanels.add(wbPanel);
+                this.updatePanelsTeleOp.add(wbPanel);
             }
             wbPanel.start();
         }
 
         // recursive panels
         for (int i2 = 0; i2 < tabs.size(); i2++) {
-            WBPanel wbPanel = tabs.get(i2);
+            Tab tab = tabs.get(i2);
 
-            WBPanelUtils.traverse(wbPanel, panel -> {
+            WBPanelUtils.traverse(tab, panel -> {
                 if (panel.usesML) {
                     int id = mlId.getAndIncrement();
                     panel.assignML(new MessageLayer(server, id), id);
 
                     this.updatePanels.add(panel);
+                    if (tab.getTitle() == "TeleOp") {
+                        this.updatePanelsTeleOp.add(panel);
+                    }
+                    if (panel.getPanelName() == "Overrides") {
+                        this.overrides = (Overrides) panel;
+                    }
                 }
 
                 panel.start();
@@ -148,14 +157,23 @@ public class WildBoard {
      */
     public void update() {
         // update all panels
-        for (WBPanel wbPanel : updatePanels) {
-            wbPanel.update();
+        // System.out.println(this.overrides.compMode);
+        if (!(this.overrides != null && this.overrides.compMode)) {
+            for (WBPanel wbPanel : updatePanels) {
+                wbPanel.update();
+                wbPanel.ml.update();
+            }
+        } else {
+            for (WBPanel wbPanel : updatePanelsTeleOp) {
+                wbPanel.update();
+                wbPanel.ml.update();
+            }
         }
 
         server.ws.flush();
 
         double curTime_s = Timer.getTimestamp();
-        loopTime_ms = Math.floor((curTime_s - lastTime_s)*1000);
+        loopTime_ms = Math.floor((curTime_s - lastTime_s) * 1000);
         lastTime_s = curTime_s;
     }
 }

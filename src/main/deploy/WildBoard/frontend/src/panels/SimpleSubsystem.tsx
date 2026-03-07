@@ -84,7 +84,7 @@ export default function ({
             {!velocity && !absolute ? (
                 <>
                     <ArmableButton
-                        text="CALIB"
+                        text="ZERO"
                         onToggle={onToggle}
                         onClick={onClick}
                         onRelease={onRelease}

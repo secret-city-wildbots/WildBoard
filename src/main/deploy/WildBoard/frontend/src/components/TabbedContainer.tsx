@@ -23,8 +23,20 @@ export default function TabbedContainer({ tabs }: TabbedContainerProps) {
   const [activeIndex, setActiveIndex] = useState(getInitialIndex);
 
   useEffect(() => {
+    if (!tabs.length) return;
+
+    const safeIndex = Math.min(activeIndex, tabs.length - 1);
+
+    if (safeIndex !== activeIndex) {
+      setActiveIndex(safeIndex);
+      return;
+    }
+
+    const tab = tabs[safeIndex];
+    if (!tab) return;
+
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", tabs[activeIndex].title.toLowerCase());
+    url.searchParams.set("tab", tab.title.toLowerCase());
     window.history.replaceState(null, "", url.toString());
   }, [activeIndex, tabs]);
 
