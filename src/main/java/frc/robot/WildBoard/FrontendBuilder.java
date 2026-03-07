@@ -64,7 +64,7 @@ public class FrontendBuilder {
             esbuildTmp.getAbsolutePath(),
             indexLoader.getAbsolutePath(),
             "--bundle",
-            "--sourcemap", //UNCOMMENT FOR DEBUGGING
+            //"--sourcemap", //UNCOMMENT FOR DEBUGGING
             "--outfile=" + new File(outputDir, "index.js").getAbsolutePath(),
             "--format=esm",
             "--platform=browser",

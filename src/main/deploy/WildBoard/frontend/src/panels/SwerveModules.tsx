@@ -186,12 +186,12 @@ export default function ({
                 </td>
             </tr>
         </table>
-        <div style="display: flex; justify-center: center; align-items: center; padding-top: 1rem;">
+        {/*<div style="display: flex; justify-center: center; align-items: center; padding-top: 1rem;">
             <div style="padding-right: 0.4rem;">
                 <Button text="HOME" onClick={onClickHome} onRelease={onReleaseHome}/>
             </div>
             <ArmableButton text="CALIB" onClick={onClickCalib} onRelease={onReleaseCalib} />
-        </div>
+        </div>*/}
     </div>
   );
 };

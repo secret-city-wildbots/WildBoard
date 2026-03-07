@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
                     new CameraFeed(5803)).addChild(
                         new CameraFeed(5804))))
         .addChild(new Col(4).addChild(
-            new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode", "Disable Shot Smoothing", "Manual Climb", "Manual Aim" }, 2))));
+            new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode", "Disable Shot Smoothing", "Always Aim at Hub", "Disable Shoot Safeties" }, 2))));
 
     // Subsystems
     WBshooter = new VelocitySimpleSubsystem("Shooter");
