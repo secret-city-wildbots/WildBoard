@@ -185,3 +185,5 @@ compile_commands.json
 
 # Eclipse generated file for annotation processors
 .factorypath
+
+Launcher/build/webview_launcher/webview_launcher.pkg

@@ -1,5 +1,19 @@
 @import url("./fonts/Kanit.css");
 
+/* chromium/firefox rendering normalization */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+}
+
 html,
 body {
     margin: 0;
@@ -19,9 +33,35 @@ body {
 
 body {
     background-color: #202022;
-    font-family: Kanit;
+    font-family: "Kanit", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     height: calc(100vh - 1px);
     overflow-y: hidden;
+    line-height: 1.2;
+    padding-right: 1rem;
+    --edge-glow: rgba(68, 142, 205, 0.4);
+    --edge-glow-d: 6px;
+
+    transition: ease-in-out box-shadow 0.5s;
+
+    box-shadow:
+        inset 0 var(--edge-glow-d) var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow),
+        inset var(--edge-glow-d) 0 var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow),
+        inset calc(var(--edge-glow-d) * -1) 0 var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow);
+}
+
+body:has(.grid-square.highlighted) {
+    --edge-glow: rgba(255, 1, 152, 0.8);
+    --edge-glow-d: 12px;
+}
+
+/* chromium form controls don't inherit fonts unless forced */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 *,
@@ -60,6 +100,7 @@ body {
 
 .sidepanel.column {
     padding: 0.25rem;
+    padding-right: 0;
 }
 
 .sidepanel.column:not(:first-child)::before {
@@ -94,6 +135,7 @@ body {
 }
 
 .tab-bar {
+    padding-top: 0.3rem;
     display: flex;
     border-bottom: 2px solid rgba(116, 255, 6, 0.8) !important;
 }
@@ -287,7 +329,7 @@ but it works for now.
 /* readout */
 
 .readout {
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
     border-radius: 10px;
     box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.2);
@@ -547,7 +589,7 @@ input[type="number"] {
     width: 100%;
     flex-grow: 1;
     min-height: 364px;
-    height:100%;
+    height: 100%;
 
     display: flex;
 }
