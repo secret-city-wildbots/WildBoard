@@ -23,19 +23,33 @@ export default function TabbedContainer({ tabs }: TabbedContainerProps) {
   const [activeIndex, setActiveIndex] = useState(getInitialIndex);
 
   useEffect(() => {
+    if (!tabs.length) return;
+
+    const safeIndex = Math.min(activeIndex, tabs.length - 1);
+
+    if (safeIndex !== activeIndex) {
+      setActiveIndex(safeIndex);
+      return;
+    }
+
+    const tab = tabs[safeIndex];
+    if (!tab) return;
+
     const url = new URL(window.location.href);
-    url.searchParams.set("tab", tabs[activeIndex].title.toLowerCase());
+    url.searchParams.set("tab", tab.title.toLowerCase());
     window.history.replaceState(null, "", url.toString());
-  }, [activeIndex]);
+  }, [activeIndex, tabs]);
 
   return (
     <div class="container-fluid">
       <div class="tab-bar">
         {tabs.map((tab, index) => (
           <button
-            class={"tab-selector "+((activeIndex === index ? "bubble":""))}
             key={index}
             type="button"
+            class={
+              "tab-selector " + (activeIndex === index ? "bubble" : "")
+            }
             onClick={() => setActiveIndex(index)}
             style={{
               fontWeight: activeIndex === index ? "500" : "400",
@@ -45,11 +59,17 @@ export default function TabbedContainer({ tabs }: TabbedContainerProps) {
           </button>
         ))}
       </div>
+
       <div style={{ paddingTop: "0rem" }}>
         {tabs.map((tab, index) => (
           <div
             key={index}
-            style={{ display: activeIndex === index ? "block" : "none" }}
+            hidden={activeIndex !== index}
+            style={{
+              contain: activeIndex === index
+                ? "layout"
+                : "layout style paint",
+            }}
           >
             {tab.content}
           </div>

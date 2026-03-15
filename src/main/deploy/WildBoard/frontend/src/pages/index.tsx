@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { useRef } from "preact/hooks";
 import TabbedContainer from "../components/TabbedContainer.tsx";
 import Container from "../components/Container.tsx";
 import FlexRow from "../components/FlexRow.tsx";
@@ -7,7 +8,14 @@ import LooptimeMonitor from "../panels/LooptimeMonitor.tsx";
 import { WsEventBus } from "../ws/WSEventBus.ts";
 
 export default function () {
-    const socket = new WsEventBus(`ws://${window.location.hostname}:5805`);
+    // Create the WsEventBus once per mounted page. Using a ref prevents
+    // recreating the socket on every render which caused repeated mounts
+    // and many websocket connections/listeners.
+    const socketRef = useRef<WsEventBus | null>(null);
+    if (!socketRef.current) {
+        socketRef.current = new WsEventBus(`ws://${window.location.hostname}:5805`);
+    }
+    const socket = socketRef.current;
 
     const tabs = [
         {

@@ -13,6 +13,10 @@ public class Tab extends WBPanel {
         return this;
     }
 
+    public String getTitle() {
+        return this.title;
+    }
+
     /**
      * Add a child
      */
@@ -25,7 +29,7 @@ public class Tab extends WBPanel {
     public String genImport() {
         String childImports = "";
         for (WBPanel child: this.children) {
-            childImports+=child.genImport();
+            childImports+=child.genImport()+"\n";
         }
         return childImports;
     }
