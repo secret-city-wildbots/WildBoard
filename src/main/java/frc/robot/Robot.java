@@ -50,10 +50,6 @@ public class Robot extends TimedRobot {
         .addChild(new Checklist())
         .setTitle("Checklist"));
 
-    // Setup
-    dashboard.addTab(new Tab()
-        .setTitle("Setup/Auto"));
-
     // TeleOp
     dashboard.addTab(new Tab()
         .setTitle("TeleOp")
@@ -61,14 +57,18 @@ public class Robot extends TimedRobot {
             new FieldMap()))
         .addChild(new Col(6).addChild(
             new Row().addChild(
-                new CameraFeed(5801)).addChild(
-                    new CameraFeed(5802)))
+                new CameraFeed(5800)).addChild(
+                    new CameraFeed(5801)))
             .addChild(
                 new Row().addChild(
-                    new CameraFeed(5803)).addChild(
-                        new CameraFeed(5804))))
+                    new CameraFeed(5802)).addChild(
+                        new CameraFeed(5803))))
         .addChild(new Col(4).addChild(
-            new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode", "Disable Shot Smoothing", "Always Aim at Hub", "Disable Shoot Safeties" }, 2))));
+            new AutoChooser(new String[] { "Go Forward", "Move Fast" }).onChange((String choice) -> {
+              System.out.println(choice);
+            })).addChild(
+                new Overrides(new String[] { "Limelight PowerSaver", "Disable Camera Feeds", "CompMode",
+                    "Disable Shot Smoothing", "Always Aim at Hub", "Disable Shoot Safeties" }, 2))));
 
     // Subsystems
     WBshooter = new VelocitySimpleSubsystem("Shooter");
@@ -90,7 +90,22 @@ public class Robot extends TimedRobot {
     dashboard.addTab(new Tab()
         .addChild(
             new Col(4).addChild(
-                WBswerveModules))
+                WBswerveModules).addChild(
+                    new SystemsCheck().onTest(() -> {
+                      // drive in square
+
+                      // full climber squence
+
+                      // deploy intake
+                      // intake
+                      // retract intake
+                      // aim turret to 0
+                      // aim hood to 0
+                      // spin up shooter
+                      // spin up transfer
+                      // spin spindexer to shoot
+                      System.out.println("blah");
+                    })))
         .addChild(
             new Col(3).addChild(
                 new Placeholder("Climb", 20)))

@@ -320,6 +320,7 @@ but it works for now.
     background-color: #202022;
     max-height: 20rem;
     overflow-y: auto;
+    border: 1px solid rgb(68, 142, 205);
 }
 
 .dropdown-item {
@@ -609,4 +610,14 @@ input[type="number"] {
     position: absolute;
     inset: 0;
     pointer-events: none;
+}
+
+.field-map {
+    contain: layout paint;
+    isolation: isolate;
+}
+
+.field-map-canvas {
+    transform: translateZ(0);
+    will-change: transform;
 }

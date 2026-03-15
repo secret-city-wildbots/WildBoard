@@ -1,7 +1,27 @@
 import { h } from "preact";
+import { useState } from "preact/hooks";
 
-export default function({ port }: { port: number }) {
-    return (
-        <image href={`10.42.65.2:${port}`} style="width: 100%; height: auto; object-fit: contain;" />
-    );
-};
+interface LimelightProps {
+  port: number;
+  aspectRatio?: number; // width / height, default 1.6
+}
+
+export default function Limelight({ port, aspectRatio = 1.6 }: LimelightProps) {
+  const [error, setError] = useState(false);
+
+  return (
+    <img
+      src={`10.42.65.2:${port}`}
+      alt={`Limelight Disconnected src: 10.42.65.2:${port}`}
+      onError={() => setError(true)}
+      onLoad={() => setError(false)}
+      style={{
+        width: "100%",
+        height: error ? `calc(100% / ${aspectRatio})` : "auto",
+        aspectRatio: error ? `${aspectRatio}` : undefined,
+        objectFit: "contain",
+        display: "block",
+      }}
+    />
+  );
+}
