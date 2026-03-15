@@ -10,6 +10,7 @@ public class Col extends WBPanel {
      */
     public Col(int width) {
         this.width = width;
+        this.setPanelName("Col");
     }
 
     /**
@@ -31,5 +32,14 @@ public class Col extends WBPanel {
             }
         }
         return "<div class=\"col-"+this.width+" column\">"+childrenString+"</div>";
+    }
+
+    @Override
+    public String genImport() {
+        String childImports = "";
+        for (WBPanel child: this.children) {
+            childImports+=child.genImport()+"\n";
+        }
+        return childImports;
     }
 }

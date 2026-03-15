@@ -1,32 +1,39 @@
 import { h } from "preact";
-import { Dispatch, StateUpdater, useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 
 interface DropdownProps {
     label?: string;
     items: string[];
-    valSetter: (newVal:string) => void;
+    valSetter: (newVal: string) => void;
 }
 
 const Dropdown = ({ label, items, valSetter }: DropdownProps) => {
-    if (!label) {
-        label = items[0];
-    }
-    valSetter(label);
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedLabel, setSelectedLabel] = useState(label);
+    const [selectedLabel, setSelectedLabel] = useState(label || items[0]);
 
     const toggleMenu = () => setIsOpen((prev) => !prev);
 
-    document.addEventListener("click", (e) => {
-        if (!e.target.classList.contains("dropdown-toggle")) {
-            setIsOpen(false);
-        }
-    });
-
     const handleItemClick = (item: string) => {
         setSelectedLabel(item);
-        valSetter(item);
+        setIsOpen(false);
     };
+
+    // Only call valSetter when selectedLabel changes
+    useEffect(() => {
+        valSetter(selectedLabel);
+    }, [selectedLabel]);
+
+    // Click outside to close
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest(".dropdown")) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("click", handler);
+        return () => document.removeEventListener("click", handler);
+    }, []);
 
     return (
         <div class="dropdown">
@@ -44,7 +51,7 @@ const Dropdown = ({ label, items, valSetter }: DropdownProps) => {
                         <button
                             class={
                                 "dropdown-item" +
-                                (item == selectedLabel ? " active" : "")
+                                (item === selectedLabel ? " active" : "")
                             }
                             onClick={() => handleItemClick(item)}
                         >

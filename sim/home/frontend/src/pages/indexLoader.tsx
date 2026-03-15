@@ -5,3 +5,4 @@ render(
     <Page />,
   document.getElementsByTagName("main")[0]!
 );
+

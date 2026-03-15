@@ -14,7 +14,7 @@ export default function ({ id, socket }: Props) {
       <label class="label-small" style="margin-right: 0; padding-right: 0;">
         Loop (ms): 
       </label>
-      <WSReadout socket={socket} id={id} defaultText="20" />
+      <WSReadout socket={socket} id={id} defaultText="20" chart min={0} max={50} />
     </FlexRow>
   );
 }

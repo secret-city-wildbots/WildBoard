@@ -11,8 +11,7 @@ public class VelocitySimpleSubsystem extends WBPanel {
         this.addProp("velocity", true);
     }
 
-    public void updateVals(double pos, double temp_C) {
-        this.ml.send(pos + "," + temp_C);
-
+    public void updateVals(double vel, double temp_C) {
+        this.ml.send(vel + "," + temp_C);
     }
 }

@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -28,9 +29,6 @@ public class Server {
     public WsServer ws;
     private HttpServer httpServer;
 
-    /*
-     * A simple http + ws implementation made by ChatGPT
-     */
     public Server(int port) {
         try {
             File tmp;
@@ -40,20 +38,17 @@ public class Server {
                 tmp = new File("/tmp");
             }
 
-            publicDir = Filesystem.getDeployDirectory().toPath().resolve("WildBoard/frontend/public");
+            publicDir = Filesystem.getDeployDirectory()
+                    .toPath()
+                    .resolve("WildBoard/frontend/public");
             Path dynamicDir = new File(tmp, "frontend-public").toPath();
 
-            // --- HTTP Server ---
             httpServer = HttpServer.create(new InetSocketAddress(port), 0);
             httpServer.createContext("/dynamic/", new StaticFileHandler(dynamicDir));
             httpServer.createContext("/", new StaticFileHandler(publicDir));
             httpServer.setExecutor(null);
 
-            // --- WebSocket Server ---
             ws = new WsServer(port + 1);
-            ws.on("ping", (socket, data) -> {
-                ws.emit(socket, "pong", "");
-            });
 
             System.out.println("HTTP + WebSocket server running on port " + (port + 1));
             System.out.println("Serving files from: " + publicDir.toAbsolutePath());
@@ -82,7 +77,6 @@ public class Server {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Ignore WebSocket upgrade requests
             if ("websocket".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Upgrade"))) {
                 exchange.sendResponseHeaders(400, 0);
                 exchange.close();
@@ -105,14 +99,10 @@ public class Server {
             }
 
             if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
-                // get the mime type
                 String mimeType = URLConnection.guessContentTypeFromName(filePath.toString());
-
-                // if it doesn't have mime type set to default of octet-stream
                 if (mimeType == null)
                     mimeType = "application/octet-stream";
 
-                // read file and send response
                 byte[] fileBytes = Files.readAllBytes(filePath);
                 exchange.getResponseHeaders().set("Content-Type", mimeType);
                 exchange.sendResponseHeaders(200, fileBytes.length);
@@ -138,19 +128,26 @@ public class Server {
     // WebSocket Server
     // -----------------------
     static class WsServer extends WebSocketServer {
+
         private final Set<WebSocket> clients = Collections.synchronizedSet(new HashSet<>());
         private final ObjectMapper mapper = new ObjectMapper();
         private final Map<String, List<BiConsumer<WebSocket, Object>>> eventHandlers = new ConcurrentHashMap<>();
+        public Map<Integer, Consumer<String>> onMsg;
+
+        // ===== BATCHING =====
+        private final StringBuilder batch = new StringBuilder();
+        private final Object batchLock = new Object();
 
         public WsServer(int port) {
             super(new InetSocketAddress(port));
+            
+            onMsg = new ConcurrentHashMap<>();
         }
 
         @Override
         public void onOpen(WebSocket conn, ClientHandshake handshake) {
             clients.add(conn);
             System.out.println("Client connected: " + conn.getRemoteSocketAddress());
-            emit(conn, "connected", "Welcome!");
         }
 
         @Override
@@ -161,18 +158,23 @@ public class Server {
 
         @Override
         public void onMessage(WebSocket conn, String message) {
-            try {
-                ObjectNode msg = (ObjectNode) mapper.readTree(message);
-                String event = msg.has("event") ? msg.get("event").asText() : null;
-                var data = msg.has("data") ? msg.get("data") : null;
+            if (message.equals("p")) {
+                this.ping();
+                return;
+            }
+            if (onMsg != null) {
+                try {
+                    int dot = message.indexOf('.');
+                    if (dot <= 1)
+                        throw new RuntimeException();
 
-                if (event != null) {
-                    trigger(event, conn, data);
-                } else {
-                    System.out.println("Invalid message format: " + message);
+                    int id = Integer.parseInt(message.substring(1, dot));
+                    String payload = message.substring(dot + 1);
+
+                    onMsg.get(id).accept(payload);
+                } catch (Exception e) {
+                    System.err.println("Invalid message: " + message);
                 }
-            } catch (Exception e) {
-                System.err.println("Invalid JSON message: " + message);
             }
         }
 
@@ -186,49 +188,43 @@ public class Server {
             System.out.println("WebSocket server ready");
         }
 
-        // ------------------------------------
-        // Event Handling
-        // -------------------------------------
-        public void on(String event, BiConsumer<WebSocket, Object> handler) {
-            eventHandlers.computeIfAbsent(event, k -> new ArrayList<>()).add(handler);
+        public void enqueue(String msg) {
+            synchronized (batchLock) {
+                batch.append(msg.length()).append(':').append(msg);
+            }
         }
 
-        private void trigger(String event, WebSocket conn, Object data) {
-            List<BiConsumer<WebSocket, Object>> handlers = eventHandlers.get(event);
-            if (handlers != null) {
-                for (BiConsumer<WebSocket, Object> handler : handlers) {
-                    handler.accept(conn, data);
+        public void bind(int id, Consumer<String> handler) {
+            onMsg.put(id, handler);
+        }
+
+        public void flush() {
+            String out;
+
+            synchronized (batchLock) {
+                out = batch.toString();
+                batch.setLength(0);
+            }
+
+            if (out.isEmpty())
+                return;
+
+            //System.out.println(out);
+
+            synchronized (clients) {
+                for (WebSocket client : clients) {
+                    client.send(out);
                 }
-            } else {
-                emit(conn, "error", "Unknown event: " + event);
             }
         }
 
-        // -----------------------
-        // Emit + Broadcast
-        // -----------------------
-        public void emit(WebSocket conn, String event, Object data) {
+        public void ping() {
             try {
-                ObjectNode msg = mapper.createObjectNode();
-                msg.put("event", event);
-                msg.set("data", mapper.valueToTree(data));
-                conn.send(mapper.writeValueAsString(msg));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void broadcast(String event, Object data) {
-            try {
-                ObjectNode msg = mapper.createObjectNode();
-                msg.put("event", event);
-                msg.set("data", mapper.valueToTree(data));
-                String text = mapper.writeValueAsString(msg);
                 synchronized (clients) {
-                    for (WebSocket client : clients) {
-                        client.send(text);
-                    }
+                for (WebSocket client : clients) {
+                    client.send("p");
                 }
+            }
             } catch (Exception e) {
                 e.printStackTrace();
             }

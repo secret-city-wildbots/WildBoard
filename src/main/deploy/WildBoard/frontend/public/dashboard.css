@@ -1,5 +1,19 @@
 @import url("./fonts/Kanit.css");
 
+/* chromium/firefox rendering normalization */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+}
+
 html,
 body {
     margin: 0;
@@ -19,9 +33,35 @@ body {
 
 body {
     background-color: #202022;
-    font-family: Kanit;
+    font-family: "Kanit", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     height: calc(100vh - 1px);
     overflow-y: hidden;
+    line-height: 1.2;
+    padding-right: 1rem;
+    --edge-glow: rgba(68, 142, 205, 0.4);
+    --edge-glow-d: 6px;
+
+    transition: ease-in-out box-shadow 0.5s;
+
+    box-shadow:
+        inset 0 var(--edge-glow-d) var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow),
+        inset var(--edge-glow-d) 0 var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow),
+        inset calc(var(--edge-glow-d) * -1) 0 var(--edge-glow-d) calc(var(--edge-glow-d) * -1) var(--edge-glow);
+}
+
+body:has(.grid-square.highlighted) {
+    --edge-glow: rgba(255, 1, 152, 0.8);
+    --edge-glow-d: 12px;
+}
+
+/* chromium form controls don't inherit fonts unless forced */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 *,
@@ -29,17 +69,19 @@ body {
     color: #eed;
 }
 
-.row > * {
+.row>* {
     padding: 0;
 }
 
 /* Random bits */
 
 .column-item {
-    padding: 0.25rem 0;
+    /*padding: 0.25rem 0;*/
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically (optional) */
+    justify-content: center;
+    /* Center horizontally */
+    align-items: center;
+    /* Center vertically (optional) */
     width: 100%;
     margin-bottom: 0.5rem;
     border-radius: 0.25rem;
@@ -48,6 +90,7 @@ body {
 
 .column {
     padding: 0.5rem;
+    padding-left: 0;
     position: relative;
 }
 
@@ -55,18 +98,21 @@ body {
     padding-left: 0;
 }
 
-/*.column:not(:first-child)::before {
+.sidepanel.column {
+    padding: 0.25rem;
+    padding-right: 0;
+}
+
+.sidepanel.column:not(:first-child)::before {
     content: "";
     position: absolute;
     top: 0;
     left: -1px;
     width: 2px;
     height: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(116, 255, 6, 0.8)
-    );
-}*/
+    background: linear-gradient(to bottom,
+            rgba(116, 255, 6, 0.8));
+}
 
 .row {
     width: 100%;
@@ -77,7 +123,7 @@ body {
 }
 
 .tab-selector {
-    padding: 0.5em 1em;
+    padding: 0.15em 1em;
     cursor: pointer;
     border: none !important;
     background: none !important;
@@ -89,6 +135,7 @@ body {
 }
 
 .tab-bar {
+    padding-top: 0.3rem;
     display: flex;
     border-bottom: 2px solid rgba(116, 255, 6, 0.8) !important;
 }
@@ -110,13 +157,13 @@ label.label-small {
     padding-right: 0.75rem;
 }
 
-table > tr > td > label {
+table>tr>td>label {
     float: right;
 }
 
 .flex-row {
-    display: flex; 
-    justify-content: center; 
+    display: flex;
+    justify-content: center;
     align-items: center;
 }
 
@@ -131,6 +178,12 @@ hr {
     padding: 0.3rem 0.5rem;
     margin-bottom: 0.2rem;
     border: none;
+}
+
+.sidepanel.column .column-item {
+    margin-bottom: 0;
+    padding-top: 0;
+    margin-top: 0;
 }
 
 /*
@@ -267,6 +320,7 @@ but it works for now.
     background-color: #202022;
     max-height: 20rem;
     overflow-y: auto;
+    border: 1px solid rgb(68, 142, 205);
 }
 
 .dropdown-item {
@@ -276,16 +330,46 @@ but it works for now.
 /* readout */
 
 .readout {
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
     border-radius: 10px;
+    box-sizing: border-box;
     background-color: rgba(0, 0, 0, 0.2);
     border: 2px solid rgb(68, 142, 205);
     font-size: 1.5rem;
     line-height: 1.5rem;
     text-align: center;
-    padding: 0.3rem 0.5rem;
+    /* padding controlled via CSS vars so JS can align the inner plot to the same inset */
+    padding: var(--rpad-y, 0.3rem) var(--rpad-x, 0.5rem);
     overflow: hidden;
 }
+
+/* inner plot area that overlays the readout content area (inside padding) */
+.readout-plot {
+    /* occupy the full readout box so we can position the canvas inside it */
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* keep rounded corners */
+    border-radius: inherit;
+}
+
+/* position the canvas to the inner content area using the same padding vars
+   so the numeric text and the plot line up perfectly. Using calc keeps the
+   canvas sized to the inner box without JS geometry. */
+.readout-plot canvas {
+    position: absolute;
+    left: var(--rpad-x, 0.5rem);
+    top: var(--rpad-y, 0.3rem);
+    width: calc(100% - (2 * var(--rpad-x, 0.5rem)));
+    height: calc(100% - (2 * var(--rpad-y, 0.3rem)));
+    display: block;
+}
+
+/* when a readout renders a background chart, we size the canvas to the
+    readout's inner content area in JS so the container padding is preserved
+    and the numeric text keeps its spacing. */
 
 /* boolean readout */
 
@@ -293,16 +377,14 @@ but it works for now.
     --chamfer: 0.75rem;
 
     /* add a chamfer (it looks very sexy) */
-    clip-path: polygon(
-        var(--chamfer) 0%,
-        calc(100% - var(--chamfer)) 0%,
-        100% var(--chamfer),
-        100% calc(100% - var(--chamfer)),
-        calc(100% - var(--chamfer)) 100%,
-        var(--chamfer) 100%,
-        0% calc(100% - var(--chamfer)),
-        0% var(--chamfer)
-    );
+    clip-path: polygon(var(--chamfer) 0%,
+            calc(100% - var(--chamfer)) 0%,
+            100% var(--chamfer),
+            100% calc(100% - var(--chamfer)),
+            calc(100% - var(--chamfer)) 100%,
+            var(--chamfer) 100%,
+            0% calc(100% - var(--chamfer)),
+            0% var(--chamfer));
 
     font-size: 1.5rem;
     line-height: 1.5rem;
@@ -312,7 +394,7 @@ but it works for now.
 
 /* Swerve Module */
 
-.swerve-modules > table > tr > td:first-child {
+.swerve-modules>table>tr>td:first-child {
     padding-top: 0.6rem !important;
     padding-bottom: 0.6rem !important;
 }
@@ -357,4 +439,185 @@ input[type="number"] {
     mask-position: center;
     mask-size: 80%;
     background-color: green;
+}
+
+/* Master Alarms */
+
+.grid-squares {
+    width: 100%;
+    display: grid;
+    box-sizing: border-box;
+
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(68, 142, 205, 0.9);
+    border-radius: 10px;
+    overflow: hidden;
+
+    animation: master-flash 1s linear infinite;
+}
+
+@keyframes master-flash {
+
+    0%,
+    15%,
+    85%,
+    100% {
+        --alarm-on: 1;
+    }
+
+    35%,
+    65% {
+        --alarm-on: 0;
+    }
+}
+
+.grid-square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.8rem;
+    font-weight: 500;
+    text-align: center;
+    user-select: none;
+
+    background: rgba(255, 255, 255, 0.03);
+    color: #eed;
+
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        color 0.2s ease;
+}
+
+.grid-square:nth-child(n) {
+    box-sizing: border-box;
+}
+
+.grid-square.highlighted {
+    color: #fff;
+
+    background: rgba(255, 1, 152,
+            calc(0.15 + 0.1 * var(--alarm-on)));
+
+    box-shadow: inset 0 0 calc(12px * var(--alarm-on)) rgba(255, 1, 152,
+            calc(0.6 * var(--alarm-on)));
+
+    border: 2px solid rgba(255, 1, 152,
+            calc(var(--alarm-on)));
+}
+
+.grid-square:hover {
+    background: rgba(68, 142, 205, 0.12);
+}
+
+/* Popover (unchanged) */
+
+.popover {
+    background-color: #202022 !important;
+    border: 2px solid rgba(68, 142, 205, 0.7) !important;
+    border-radius: 10px;
+    color: #eed !important;
+    max-width: 200px;
+    box-shadow: 0 0 12px rgba(68, 142, 205, 0.4);
+}
+
+.popover .popover-header {
+    background-color: rgba(68, 142, 205, 0.1) !important;
+    color: #eed !important;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(68, 142, 205, 0.3);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.popover .popover-body {
+    background-color: transparent !important;
+    color: #eed !important;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.popover.bs-popover-top .arrow::before,
+.popover.bs-popover-bottom .arrow::before,
+.popover.bs-popover-start .arrow::before,
+.popover.bs-popover-end .arrow::before {
+    border-color: #202022 !important;
+}
+
+/* Overrides */
+
+.switch-grid {
+    display: grid;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.switch-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.75rem 0.5rem;
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.switch-grid-item:hover {
+    background: rgba(255, 1, 152, 0.08);
+}
+
+.switch-grid-label {
+    margin-bottom: 0.6rem;
+    padding-right: 0 !important;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+/* Field Map */
+.field-map {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    min-height: 364px;
+    height: 100%;
+
+    display: flex;
+}
+
+.field-map-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.field-map-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.field-map {
+    contain: layout paint;
+    isolation: isolate;
+}
+
+.field-map-canvas {
+    transform: translateZ(0);
+    will-change: transform;
 }
